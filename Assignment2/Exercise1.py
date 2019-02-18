@@ -5,18 +5,20 @@ import numpy as np
 import torch
 from torch.autograd import Variable
 
+N = 100  # number of points per class
+D = 2  # dimensionality
+K = 3  # number of classes
 
-def exercise1(learning_rate=0.0001, n_hidden_layers=50, n_iterations=100_000):
-    """
-    :param learning_rate: the learning rate
-    :param n_hidden_layers: the number of the hidden layers
-    :param n_iterations: the number of hte iterations for gradient descent
-    :return: a numpy array of loss values over each gradient descent
+
+def pre_train(is_visualized=False):
     """
 
-    N = 100  # number of points per class
-    D = 2  # dimensionality
-    K = 3  # number of classes
+    used to generate the data to construct the neural network mode
+    :param is_visualized:
+    :return: x1: argument input vectors
+    :return: y1
+    """
+
     X = np.zeros((N * K, D))  # data matrix (each row = single example)
     y = np.zeros(N * K, dtype='uint8')  # class labels
     for j in range(K):
@@ -26,27 +28,38 @@ def exercise1(learning_rate=0.0001, n_hidden_layers=50, n_iterations=100_000):
         X[ix] = np.c_[r * np.sin(t), r * np.cos(t)]
         y[ix] = j
 
-    # lets visualize the data:
-    plt.scatter(X[:, 0], X[:, 1], c=y, s=40, cmap=plt.cm.Spectral)
-    plt.show()
-
-    # define loss value record
-    loss_values = np.zeros(n_iterations)
-
-    dtype = torch.FloatTensor
-
     # argument input vectors
-    x1 = Variable(torch.from_numpy(X).type(dtype), requires_grad=False)
+    x1 = Variable(torch.from_numpy(X).type(torch.FloatTensor), requires_grad=False)
     el1 = torch.cat((torch.ones(100), torch.zeros(200)), 0)
     el2 = torch.cat((torch.zeros(100), torch.ones(100), torch.zeros(100)), 0)
     el3 = torch.cat((torch.zeros(200), torch.ones(100)), 0)
     yy = torch.stack((el1, el2, el3), 1)
     y1 = Variable(torch.stack((el1, el2, el3), 1), requires_grad=False)
 
+    if is_visualized:
+        # visualize the data:
+        plt.scatter(X[:, 0], X[:, 1], c=y, s=40, cmap=plt.cm.Spectral)
+        plt.show()
+
+    return x1, y1
+
+
+def gradient_descent(x1, y1, learning_rate=0.0001, n_units=50, n_iterations=100_000):
+    """
+    gradient descent for the neural network mode
+    :param x1: the input vector
+    :param learning_rate: the learning rate
+    :param n_units: the number of units in the hidden layer
+    :param n_iterations: the number of hte iterations for gradient descent
+    :return: a numpy array of loss values over each gradient descent
+    """
+    # define loss value record
+    loss_values = np.zeros(n_iterations)
+
     # parameters
-    w1 = Variable(0.5 * torch.randn(D, n_hidden_layers), requires_grad=True)
-    b1 = Variable(torch.randn(1, n_hidden_layers), requires_grad=True)
-    w2 = Variable(0.5 * torch.randn(n_hidden_layers, K), requires_grad=True)
+    w1 = Variable(0.5 * torch.randn(D, n_units), requires_grad=True)
+    b1 = Variable(torch.randn(1, n_units), requires_grad=True)
+    w2 = Variable(0.5 * torch.randn(n_units, K), requires_grad=True)
     b2 = Variable(torch.randn((1, K)), requires_grad=True)
 
     # run with different learning rates
@@ -97,38 +110,73 @@ def exercise1(learning_rate=0.0001, n_hidden_layers=50, n_iterations=100_000):
     error = N * K - torch.sum(err)
     print('The number of misclassified examples: ', error)
 
-    return loss_values
+    accuracy = torch.sum(err).numpy() / (N * K)
+    return loss_values, accuracy
 
 
-# generate hyper-parameters ranging from 0.1 to 10^-9
-N_RATES = 9
-N_ITERATIONS = 20_000
-N_HIDDEN_LAYERS = 50
-learning_rates = [math.pow(10, -n) for n in range(1, 1 + N_RATES)]
-loss_array = np.empty((N_RATES, N_ITERATIONS))
-for i in range(N_RATES):
-    loss_array[i] = exercise1(
-        learning_rate=learning_rates[i],
-        n_hidden_layers=N_HIDDEN_LAYERS,
-        n_iterations=N_ITERATIONS
-    )
+def exercise1_1():
+    """
+    exercise 1-1
+    :return:
+    """
+    # generate hyper-parameters ranging from 0.1 to 10^-9
+    n_rates = 9
+    n_iterations = 20_000
+    n_units = 50
+    learning_rates = [math.pow(10, -n) for n in range(1, 1 + n_rates)]
+    loss_array = np.empty((n_rates, n_iterations))
+    x1, y1 = pre_train()
 
-# print the first 10 loss values
-N_FIRST_ROWS = 10
-for i in range(N_FIRST_ROWS):
-    for j in range(N_RATES):
-        print('{0: 10.3f}\t'.format(loss_array[j, i]), end='')
-    print("")
+    for i in range(n_rates):
+        loss_array[i], _ = gradient_descent(
+            x1=x1,
+            y1=y1,
+            learning_rate=learning_rates[i],
+            n_units=n_units,
+            n_iterations=n_iterations
+        )
+
+    # print the first 10 loss values
+    n_first_rows = 10
+    for i in range(n_first_rows):
+        for j in range(n_rates):
+            print('{0: 10.3f}\t'.format(loss_array[j, i]), end='')
+        print("")
+
+    # plot the loss values
+    figure1 = plt.figure()
+    plot_x = [n for n in range(1, n_iterations + 1)]
+    for i in range(n_rates):
+        plt.plot(plot_x, loss_array[i, :])
+
+    plt.title('Loss values over the iteration with different learning rates')
+    plt.xlabel('iteration number')
+    plt.ylabel('loss value')
+    plt.legend(['learning rate = {}'.format(learning_rate) for learning_rate in learning_rates], loc='upper right')
+    plt.ylim(0, 500.0)
+    plt.show()
 
 
-# plot the loss values
-figure2 = plt.figure()
-plot_x = [n for n in range(1, N_ITERATIONS + 1)]
-for i in range(N_RATES):
-    plt.plot(plot_x, loss_array[i, :])
+def exercise1_2():
+    n_units = [10, 20, 30, 40, 50, 60]
+    accuracy_array = np.empty(len(n_units))
+    x1, y1 = pre_train()
 
-plt.xlabel('iteration number')
-plt.ylabel('loss value')
-plt.legend(['learning rate = {}'.format(learning_rate) for learning_rate in learning_rates], loc='upper right')
-plt.ylim(0, 500.0)
-plt.show()
+    for i in range(len(n_units)):
+        _, accuracy_array[i] = gradient_descent(
+            x1,
+            y1,
+            n_units=n_units[i],
+            n_iterations=20_000
+        )
+
+    figure2 = plt.figure()
+    plt.plot(n_units, accuracy_array * 100, 'r+-')
+    plt.title('Accuracy over different sizes of hidden layer')
+    plt.xlabel('Size of the hidden layer')
+    plt.ylabel('accuracy percentage')
+    plt.show()
+
+
+# exercise1_1()
+exercise1_2()
