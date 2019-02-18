@@ -78,6 +78,21 @@ for j in range(N_RATES):
         b2.grad.data.zero_()
         b1.grad.data.zero_()
 
+    # evaluate training set accuracy
+    desired_class = torch.cat((torch.zeros(100), torch.ones(100), torch.add(torch.ones(100), 1)), 0)
+    hout = x1.mm(w1) + b1
+    h_relu = hout.clamp(min=0)
+    output = h_relu.mm(w2) + b2
+    # scores = output.clamp(min=0)
+    scores = output
+    predicted_class = torch.max(scores, 1)
+    predictedClass = np.asarray(predicted_class[1])
+    predictedTC = torch.FloatTensor(predictedClass)
+    # print(predicted_class[1])
+    predicted = torch.squeeze(predictedTC)
+    err = torch.eq(desired_class, predicted)
+    error = N * K - torch.sum(err)
+    print('The number of misclassified examples: ', error)
 
 # print the first 10 loss values
 for i in range(10):
@@ -97,33 +112,3 @@ legend = ['learning rate is {}'.format(rate) for rate in learning_rates]
 plt.legend(legend, loc='upper right')
 plt.ylim(0, 500.0)
 plt.show()
-
-# plot the loss values
-figure3 = plt.figure()
-plot_x = [n for n in range(1, N_ITERATIONS + 1)]
-for i in range(N_RATES):
-    plt.plot(plot_x, loss_array[:, i])
-
-plt.xlabel('iteration number')
-plt.ylabel('loss value')
-legend = ['learning rate is {}'.format(rate) for rate in learning_rates]
-plt.legend(legend, loc='upper right')
-plt.ylim(0, 1000.0)
-plt.show()
-
-
-# evaluate training set accuracy
-desired_class = torch.cat((torch.zeros(100), torch.ones(100), torch.add(torch.ones(100), 1)), 0)
-hout = x1.mm(w1) + b1
-h_relu = hout.clamp(min=0)
-output = h_relu.mm(w2) + b2
-# scores = output.clamp(min=0)
-scores = output
-predicted_class = torch.max(scores, 1)
-predictedClass = np.asarray(predicted_class[1])
-predictedTC = torch.FloatTensor(predictedClass)
-# print(predicted_class[1])
-predicted = torch.squeeze(predictedTC)
-err = torch.eq(desired_class, predicted)
-error = N * K - torch.sum(err)
-print('The number of misclassified examples: ', error)
