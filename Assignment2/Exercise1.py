@@ -78,6 +78,7 @@ for j in range(N_RATES):
         b2.grad.data.zero_()
         b1.grad.data.zero_()
 
+
 # print the first 10 loss values
 for i in range(10):
     for j in range(N_RATES):
@@ -96,6 +97,20 @@ legend = ['learning rate is {}'.format(rate) for rate in learning_rates]
 plt.legend(legend, loc='upper right')
 plt.ylim(0, 500.0)
 plt.show()
+
+# plot the loss values
+figure3 = plt.figure()
+plot_x = [n for n in range(1, N_ITERATIONS + 1)]
+for i in range(N_RATES):
+    plt.plot(plot_x, loss_array[:, i])
+
+plt.xlabel('iteration number')
+plt.ylabel('loss value')
+legend = ['learning rate is {}'.format(rate) for rate in learning_rates]
+plt.legend(legend, loc='upper right')
+plt.ylim(0, 1000.0)
+plt.show()
+
 
 # evaluate training set accuracy
 desired_class = torch.cat((torch.zeros(100), torch.ones(100), torch.add(torch.ones(100), 1)), 0)
