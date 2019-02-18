@@ -26,7 +26,7 @@ N_RATES = 9
 learning_rates = [math.pow(10, -n) for n in range(1, 1 + N_RATES)]
 
 # define loss value record
-N_ITERATIONS = 100_000
+N_ITERATIONS = 20_000
 loss_array = np.zeros((N_ITERATIONS, N_RATES))
 
 dtype = torch.FloatTensor
@@ -90,11 +90,11 @@ plot_x = [n for n in range(1, N_ITERATIONS + 1)]
 for i in range(N_RATES):
     plt.plot(plot_x, loss_array[:, i])
 
-plt.ylim(0, 200.0)
 plt.xlabel('iteration number')
 plt.ylabel('loss value')
 legend = ['learning rate is {}'.format(rate) for rate in learning_rates]
-plt.legend(legend)
+plt.legend(legend, loc='upper right')
+plt.ylim(0, 500.0)
 plt.show()
 
 # evaluate training set accuracy
