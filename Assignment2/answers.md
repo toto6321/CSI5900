@@ -8,5 +8,10 @@
     * The best learning rate is about 0.1e-3, which is 0.0001.
 
 2. The best learning rate is about 0.0001. The plot could be found in the .ipynb file.
+    * It seems that the accuracy first increase and then decrease when the size of the hidden layers increases, 
+        and it has the best accuracy when the size is 40, from the chart.
+    * However, the plots will be totally different when repeating the test.
+    * Extend the range of the size of the hidden layer and test again.
+    * Decrease the step of the size range and test again.
 
-3. //TODO
+3. Repeat the step above with the ReLU replaced by sigmoid function.
