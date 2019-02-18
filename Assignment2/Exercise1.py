@@ -189,6 +189,8 @@ def gradient_descent_with_sigmoid_function(x1, y1, learning_rate=0.0001, n_units
 def loss_values_over_iterations_with_different_learning_rates(gd_function=0, learning_rates=[0.0001]):
     """
     loss values over iterations with different learning rates
+    :param gd_function: {0: gradient descent with ReLU, else: gradient descent with sigmoid function}
+    :paraml learning_rates: a list of learning rates to be tested
     :return:
     """
     if gd_function == 0:
