@@ -2,6 +2,22 @@
 [TOC]
 
 ## Exercise 1
+### Question
+Download the Jupyter notebook, NNExampleTorch. This notebook contains code for training a two-layer neural network with
+ReLU activation units. The code uses autograd feature to compute gradients.
+The input is a two-dimensional feature vector and the desired output is
+coded as a one-hot vector.
+
+1. First play with a few learning rates over the range of 0.1 to 0.1e-8.
+    Then perform an experiment by selecting three learning rates and
+    generate plots showing how loss goes down with training.
+2. Pick the best learning rate found in the previous step and change the
+    number of hidden layer neurons to 20, 30, 40, and 50. Plot the
+    accuracy vs hidden layer size.
+3. Next, replace the ReLU function with sigmoidal units and repeat the
+    above steps.
+
+### Experiment Analysis
 1. The plot is in the .ipynb file. We could conclude from the chart that... 
     * Local optimal point could not be reached, when the learning rate is much bigger than 0.001.
     * The learning is kind of slow when the learning rate is much smaller than 0.1e-6
