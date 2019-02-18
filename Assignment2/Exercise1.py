@@ -243,15 +243,6 @@ def exercise1_1():
     )
 
 
-def exercise1_3_1():
-    # generate hyper-parameters ranging from 0.1 to 10^-9
-    rate_list = [math.pow(10, -n) for n in range(1, 1 + 9)]
-    loss_values_over_iterations_with_different_learning_rates(
-        gd_function=1,
-        learning_rates=rate_list
-    )
-
-
 def accuracy_over_different_sizes_of_hidden_layer(gd_function=0, n_units=[20, 30, 40, 50]):
     """
     exercise1-3-2
@@ -291,6 +282,15 @@ def exercise1_2():
     accuracy_over_different_sizes_of_hidden_layer(0, n_units)
     n_units = list(range(10, 61, 1))
     accuracy_over_different_sizes_of_hidden_layer(0, n_units)
+
+
+def exercise1_3_1():
+    # generate hyper-parameters ranging from 0.1 to 10^-9
+    rate_list = [math.pow(10, -n) for n in range(1, 1 + 9)]
+    loss_values_over_iterations_with_different_learning_rates(
+        gd_function=1,
+        learning_rates=rate_list
+    )
 
 
 def exercise1_3_2():
