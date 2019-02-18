@@ -15,3 +15,7 @@
     * Decrease the step of the size range and test again.
 
 3. Repeat the step above with the ReLU replaced by sigmoid function.
+    1. It seems to have best performance with the learning rate of 0.0001 again. However, it becomes kind of unstable. 
+        I would prefer to the 0.00001.
+    2. Basically, we could conclude that it has the best accuracy when the size of the hidden layer is 50, 
+        though it behaves really weired with the size increasing.
