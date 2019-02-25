@@ -1,11 +1,13 @@
 import matplotlib.pyplot as plt
 import numpy as np
+import seaborn as sns
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 import torchvision
 import torchvision.transforms as transforms
+from sklearn import metrics
 
 # initialize the training-set and test-set variables
 transform = transforms.Compose(
@@ -166,16 +168,20 @@ with torch.no_grad():
 print('Accuracy of the network on the 10000 test images: %d %%' % (
         100 * correct / total))
 
+
 ########################################################################
 # That looks waaay better than chance, which is 10% accuracy (randomly picking
 # a class out of 10 classes).
 # Seems like the network learnt something.
 #
 # Hmmm, what are the classes that performed well, and the classes that did
+
 # not perform well:
 
 class_correct = list(0. for i in range(10))
 class_total = list(0. for i in range(10))
+actual = []
+predictions = []
 with torch.no_grad():
     for data in test_set_loader:
         images, labels = data
@@ -183,6 +189,26 @@ with torch.no_grad():
         _, predicted = torch.max(outputs, 1)
         c = (predicted == labels).squeeze()
         for i in range(4):
+            predictions.append(classes[predicted[i]])
+            actual.append(classes[labels[i]])
             label = labels[i]
             class_correct[label] += c[i].item()
             class_total[label] += 1
+
+
+##########################################################################
+# 6. Generate a 10 x 10 confusion matrix
+
+xy_labels = list(classes)
+cm = metrics.confusion_matrix(actual, predictions, xy_labels)
+fig = plt.figure(figsize=(9, 9))
+sns.heatmap(cm, annot=True, fmt=".3f", linewidths=.5, square=True,
+            cmap='Blues_r');
+plt.ylabel('Actual label');
+plt.xlabel('Predicted label');
+ax = fig.add_subplot(111)
+ax.set_xticklabels(xy_labels)
+ax.set_yticklabels(xy_labels)
+all_sample_title = 'Accuracy Score: {0}'.format(100 * correct / total)
+plt.title(all_sample_title, size=20);
+plt.show()
