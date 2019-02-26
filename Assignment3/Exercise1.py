@@ -1,6 +1,3 @@
-import matplotlib.pyplot as plt
-import numpy as np
-import seaborn as sns
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -168,7 +165,6 @@ with torch.no_grad():
 print('Accuracy of the network on the 10000 test images: %d %%' % (
         100 * correct / total))
 
-
 ########################################################################
 # That looks waaay better than chance, which is 10% accuracy (randomly picking
 # a class out of 10 classes).
@@ -195,20 +191,51 @@ with torch.no_grad():
             class_correct[label] += c[i].item()
             class_total[label] += 1
 
+import itertools
+import numpy as np
+import matplotlib.pyplot as plt
+
+
+def plot_confusion_matrix(cm, classes,
+                          normalize=False,
+                          title='Confusion matrix',
+                          cmap=plt.cm.Reds):
+    """
+    This function prints and plots the confusion matrix.
+    Normalization can be applied by setting `normalize=True`.
+    """
+    if normalize:
+        cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
+        print("Normalized confusion matrix")
+    else:
+        print('Confusion matrix, without normalization')
+
+    print(cm)
+
+    plt.imshow(cm, interpolation='nearest', cmap=cmap)
+    plt.title(title)
+    plt.colorbar()
+    tick_marks = np.arange(len(classes))
+    plt.xticks(tick_marks, classes, rotation=45)
+    plt.yticks(tick_marks, classes)
+
+    fmt = '.2f' if normalize else 'd'
+    thresh = cm.max() / 2.
+    for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
+        plt.text(j, i, format(cm[i, j], fmt),
+                 horizontalalignment="center",
+                 color="white" if cm[i, j] > thresh else "black")
+
+    plt.ylabel('True label')
+    plt.xlabel('Predicted label')
+    plt.tight_layout()
+
 
 ##########################################################################
 # 6. Generate a 10 x 10 confusion matrix
 
-xy_labels = list(classes)
-cm = metrics.confusion_matrix(actual, predictions, xy_labels)
-fig = plt.figure(figsize=(9, 9))
-sns.heatmap(cm, annot=True, fmt=".3f", linewidths=.5, square=True,
-            cmap='Blues_r');
-plt.ylabel('Actual label');
-plt.xlabel('Predicted label');
-ax = fig.add_subplot(111)
-ax.set_xticklabels(xy_labels)
-ax.set_yticklabels(xy_labels)
-all_sample_title = 'Accuracy Score: {0}'.format(100 * correct / total)
-plt.title(all_sample_title, size=20);
+labels = list(classes)
+plt.figure()
+matrix = metrics.confusion_matrix(actual, predictions, labels)
+plot_confusion_matrix(matrix, labels)
 plt.show()
