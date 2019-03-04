@@ -336,12 +336,12 @@ def accuracy_over_different_sizes_of_hidden_layer(
             n_units=n_units[i],
         )
 
-        figure3_1 = plt.figure()
-        plt.plot(n_units, accuracy_array * 100, 'r+-')
-        plt.title(title)
-        plt.xlabel('Size of the hidden layer')
-        plt.ylabel('accuracy percentage')
-        plt.show()
+    figure3_1 = plt.figure()
+    plt.plot(n_units, accuracy_array * 100, 'r+-')
+    plt.title(title)
+    plt.xlabel('Size of the hidden layer')
+    plt.ylabel('accuracy percentage')
+    plt.show()
 
 
 def exercise1_2():
