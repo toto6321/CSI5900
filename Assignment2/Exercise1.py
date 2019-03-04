@@ -5,16 +5,15 @@ import numpy as np
 import torch
 from torch.autograd import Variable
 
-N = 100  # number of points per class
-D = 2  # dimensionality
-K = 3  # number of classes
 
-
-def pre_train(is_visualized=False):
+def pre_train(is_visualized=False, N=100, D=2, K=3):
     """
 
     used to generate the data to construct the neural network mode
     :param is_visualized:
+    :param N: number of points per class
+    :param D: dimensionality
+    :param K: number of classes
     :return: x1: argument input vectors
     :return: y1
     """
@@ -23,17 +22,21 @@ def pre_train(is_visualized=False):
     y = np.zeros(N * K, dtype='uint8')  # class labels
     for j in range(K):
         ix = range(N * j, N * (j + 1))
-        r = np.linspace(0.0, 1, N)  # radius
-        t = np.linspace(j * 4, (j + 1) * 4, N) + np.random.randn(N) * 0.2  # theta
+        # radius
+        r = np.linspace(0.0, 1, N)
+        # theta
+        t = np.linspace(j * 4, (j + 1) * 4, N) + np.random.randn(N) * 0.2
         X[ix] = np.c_[r * np.sin(t), r * np.cos(t)]
         y[ix] = j
 
     # argument input vectors
-    x1 = Variable(torch.from_numpy(X).type(torch.FloatTensor), requires_grad=False)
+    x1 = Variable(
+        torch.from_numpy(X).type(torch.FloatTensor),
+        requires_grad=False
+    )
     el1 = torch.cat((torch.ones(100), torch.zeros(200)), 0)
     el2 = torch.cat((torch.zeros(100), torch.ones(100), torch.zeros(100)), 0)
     el3 = torch.cat((torch.zeros(200), torch.ones(100)), 0)
-    yy = torch.stack((el1, el2, el3), 1)
     y1 = Variable(torch.stack((el1, el2, el3), 1), requires_grad=False)
 
     if is_visualized:
@@ -44,7 +47,10 @@ def pre_train(is_visualized=False):
     return x1, y1
 
 
-def gradient_descent_with_relu(x1, y1, learning_rate=0.0001, n_units=50, n_iterations=100_000):
+def gradient_descent_with_relu(
+        x1, y1, learning_rate=0.0001, n_units=50, n_iterations=100_000,
+        N=100, D=3, K=3
+):
     """
     gradient descent for the neural network model with ReLU
     :param x1: the input vector
@@ -52,6 +58,9 @@ def gradient_descent_with_relu(x1, y1, learning_rate=0.0001, n_units=50, n_itera
     :param learning_rate: the learning rate
     :param n_units: the number of units in the hidden layer
     :param n_iterations: the number of hte iterations for gradient descent
+    :param N: number of points per class
+    :param D: dimensionality
+    :param K: number of classes
     :return: a numpy array of loss values over each gradient descent
     """
     # define loss value record
@@ -96,7 +105,10 @@ def gradient_descent_with_relu(x1, y1, learning_rate=0.0001, n_units=50, n_itera
         b1.grad.data.zero_()
 
     # evaluate training set accuracy
-    desired_class = torch.cat((torch.zeros(100), torch.ones(100), torch.add(torch.ones(100), 1)), 0)
+    desired_class = torch.cat(
+        (torch.zeros(100), torch.ones(100), torch.add(torch.ones(100), 1)),
+        0
+    )
     hout = x1.mm(w1) + b1
     h_relu = hout.clamp(min=0)
     output = h_relu.mm(w2) + b2
@@ -115,7 +127,10 @@ def gradient_descent_with_relu(x1, y1, learning_rate=0.0001, n_units=50, n_itera
     return loss_values, accuracy
 
 
-def gradient_descent_with_sigmoid_function(x1, y1, learning_rate=0.0001, n_units=50, n_iterations=100_000):
+def gradient_descent_with_sigmoid_function(
+        x1, y1, learning_rate=0.0001, n_units=50, n_iterations=100_000,
+        N=100, D=2, K=3
+):
     """
     gradient descent for the neural network model with sigmoid function
     :param x1: the input vector
@@ -123,6 +138,9 @@ def gradient_descent_with_sigmoid_function(x1, y1, learning_rate=0.0001, n_units
     :param learning_rate: the learning rate
     :param n_units: the number of units in the hidden layer
     :param n_iterations: the number of hte iterations for gradient descent
+    :param N: number of points per class
+    :param D: dimensionality
+    :param K: number of classes
     :return: a numpy array of loss values over each gradient descent
     """
     # define loss value record
@@ -167,7 +185,10 @@ def gradient_descent_with_sigmoid_function(x1, y1, learning_rate=0.0001, n_units
         b1.grad.data.zero_()
 
     # evaluate training set accuracy
-    desired_class = torch.cat((torch.zeros(100), torch.ones(100), torch.add(torch.ones(100), 1)), 0)
+    desired_class = torch.cat(
+        (torch.zeros(100), torch.ones(100), torch.add(torch.ones(100), 1)),
+        0
+    )
     hout = x1.mm(w1) + b1
     h_relu = hout.clamp(min=0)
     output = h_relu.mm(w2) + b2
@@ -186,31 +207,51 @@ def gradient_descent_with_sigmoid_function(x1, y1, learning_rate=0.0001, n_units
     return loss_values, accuracy
 
 
-def loss_values_over_iterations_with_different_learning_rates(gd_function=0, learning_rates=[0.0001]):
+def loss_values_over_iterations_with_different_learning_rates(
+        x1,
+        y1,
+        N=100,
+        D=2,
+        K=3,
+        learning_rates=[0.0001],
+        gd_function=0
+):
     """
     loss values over iterations with different learning rates
-    :param gd_function: {0: gradient descent with ReLU, else: gradient descent with sigmoid function}
-    :paraml learning_rates: a list of learning rates to be tested
+    :param x1: input
+    :param y1: class vector
+    :param N: number of points per class
+    :param D: dimensionality
+    :param K: number of classes
+    :param learning_rates: a list of learning rates to be tested
+    :param gd_function: {0: gradient descent with ReLU,
+                else: gradient descent with sigmoid function}
+
     :return:
     """
     if gd_function == 0:
         gradient_descent = gradient_descent_with_relu
-        title = 'Loss values over the iteration with different learning rates using ReLU'
+        title = 'Loss values over the iteration ' \
+                'with different learning rates using ReLU'
     else:
         gradient_descent = gradient_descent_with_sigmoid_function
-        title = 'Loss values over the iteration with different learning rates using sigmoid function'
+        title = 'Loss values over the iteration ' \
+                'with different learning rates using sigmoid function'
 
     n_rates = len(learning_rates)
     n_iterations = 20_000
     loss_array = np.empty((n_rates, n_iterations))
-    x1, y1 = pre_train()
 
     for i in range(n_rates):
         loss_array[i], _ = gradient_descent(
             x1=x1,
             y1=y1,
             learning_rate=learning_rates[i],
-            n_iterations=n_iterations
+            n_iterations=n_iterations,
+            N=N,
+            D=D,
+            K=K,
+
         )
 
     # print the first 10 loss values
@@ -229,7 +270,11 @@ def loss_values_over_iterations_with_different_learning_rates(gd_function=0, lea
     plt.title(title)
     plt.xlabel('iteration number')
     plt.ylabel('loss value')
-    plt.legend(['learning rate = {}'.format(learning_rate) for learning_rate in learning_rates], loc='upper right')
+    plt.legend(
+        ['learning rate = {}'.format(learning_rate)
+         for learning_rate in learning_rates],
+        loc='upper right'
+    )
     plt.ylim(0, 500.0)
     plt.show()
 
@@ -237,17 +282,38 @@ def loss_values_over_iterations_with_different_learning_rates(gd_function=0, lea
 def exercise1_1():
     # generate hyper-parameters ranging from 0.1 to 10^-9
     rate_list = [math.pow(10, -n) for n in range(1, 1 + 9)]
+    x1, y1 = pre_train()
     loss_values_over_iterations_with_different_learning_rates(
-        gd_function=0,
-        learning_rates=rate_list
+        x1=x1,
+        y1=y1,
+        N=100,
+        D=2,
+        K=3,
+        learning_rates=rate_list,
+        gd_function=0
     )
 
 
-def accuracy_over_different_sizes_of_hidden_layer(gd_function=0, n_units=[20, 30, 40, 50]):
+def accuracy_over_different_sizes_of_hidden_layer(
+        x1,
+        y1,
+        N=100,
+        D=2,
+        K=3,
+        n_units=[20, 30, 40, 50],
+        gd_function=0
+):
     """
     exercise1-3-2
-    :param n_units: list of sizes of the hidden layers to be tested. [20, 30, 40, 50] by default.
-    :param gd_function: {0: gradient descent with ReLU, else: gradient descent with sigmoid function}
+    :param x1: input
+    :param y1: class vector
+    :param N: number of points per class
+    :param D: dimensionality
+    :param K: number of classes
+    :param n_units: list of sizes of the hidden layers to be tested.
+                [20, 30, 40, 50] by default.
+    :param gd_function: {0: gradient descent with ReLU,
+                else: gradient descent with sigmoid function}
     :return:
     """
     if gd_function == 0:
@@ -255,15 +321,18 @@ def accuracy_over_different_sizes_of_hidden_layer(gd_function=0, n_units=[20, 30
         title = 'Accuracy over different sizes of hidden layer with ReLU'
     else:
         gradient_descent = gradient_descent_with_sigmoid_function
-        title = 'Accuracy over different sizes of hidden layer with sigmoid function'
+        title = 'Accuracy over different sizes ' \
+                'of hidden layer with sigmoid function'
 
     accuracy_array = np.empty(len(n_units))
-    x1, y1 = pre_train()
 
     for i in range(len(n_units)):
         _, accuracy_array[i] = gradient_descent(
             x1,
             y1,
+            N=N,
+            D=D,
+            K=K,
             n_units=n_units[i],
         )
 
@@ -276,33 +345,60 @@ def accuracy_over_different_sizes_of_hidden_layer(gd_function=0, n_units=[20, 30
 
 
 def exercise1_2():
+    x1, y1 = pre_train()
+
     n_units = list(range(20, 60, 10))
-    accuracy_over_different_sizes_of_hidden_layer(0, n_units)
+    accuracy_over_different_sizes_of_hidden_layer(
+        x1=x1, y1=y1, N=100, D=2, K=3,
+        n_units=n_units, gd_function=0
+    )
     n_units = list(range(10, 70, 10))
-    accuracy_over_different_sizes_of_hidden_layer(0, n_units)
+    accuracy_over_different_sizes_of_hidden_layer(
+        x1=x1, y1=y1, N=100, D=2, K=3,
+        n_units=n_units, gd_function=0
+    )
     n_units = list(range(10, 61, 1))
-    accuracy_over_different_sizes_of_hidden_layer(0, n_units)
+    accuracy_over_different_sizes_of_hidden_layer(
+        x1=x1, y1=y1, N=100, D=2, K=3,
+        n_units=n_units, gd_function=0
+    )
 
 
 def exercise1_3_1():
     # generate hyper-parameters ranging from 0.1 to 10^-9
     rate_list = [math.pow(10, -n) for n in range(1, 1 + 9)]
+
+    x1, y1 = pre_train()
+
     loss_values_over_iterations_with_different_learning_rates(
+        x1=x1, y1=y1, N=100, D=2, K=3,
+        learning_rates=rate_list,
         gd_function=1,
-        learning_rates=rate_list
     )
 
 
 def exercise1_3_2():
+    x1, y1 = pre_train()
+
     n_units = list(range(20, 60, 10))
-    accuracy_over_different_sizes_of_hidden_layer(1, n_units)
+    accuracy_over_different_sizes_of_hidden_layer(
+        x1=x1, y1=y1, N=100, D=2, K=3,
+        n_units=n_units, gd_function=1
+    )
     n_units = list(range(10, 70, 10))
-    accuracy_over_different_sizes_of_hidden_layer(1, n_units)
+    accuracy_over_different_sizes_of_hidden_layer(
+        x1=x1, y1=y1, N=100, D=2, K=3,
+        n_units=n_units, gd_function=1
+    )
     n_units = list(range(10, 61, 1))
-    accuracy_over_different_sizes_of_hidden_layer(1, n_units)
+    accuracy_over_different_sizes_of_hidden_layer(
+        x1=x1, y1=y1, N=100, D=2, K=3,
+        n_units=n_units, gd_function=1
+    )
 
 
-# exercise1_1()
-# exercise1_2()
-# exercise1_3_1()
-exercise1_3_2()
+if __name__ == '__main__':
+    exercise1_1()
+    # exercise1_2()
+    # exercise1_3_1()
+    # exercise1_3_2()
