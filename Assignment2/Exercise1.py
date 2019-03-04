@@ -5,16 +5,15 @@ import numpy as np
 import torch
 from torch.autograd import Variable
 
-N = 100  # number of points per class
-D = 2  # dimensionality
-K = 3  # number of classes
 
-
-def pre_train(is_visualized=False):
+def pre_train(is_visualized=False, N=100, D=2, K=3):
     """
 
     used to generate the data to construct the neural network mode
     :param is_visualized:
+    :param N: number of points per class
+    :param D: dimensionality
+    :param K: number of classes
     :return: x1: argument input vectors
     :return: y1
     """
@@ -33,7 +32,6 @@ def pre_train(is_visualized=False):
     el1 = torch.cat((torch.ones(100), torch.zeros(200)), 0)
     el2 = torch.cat((torch.zeros(100), torch.ones(100), torch.zeros(100)), 0)
     el3 = torch.cat((torch.zeros(200), torch.ones(100)), 0)
-    yy = torch.stack((el1, el2, el3), 1)
     y1 = Variable(torch.stack((el1, el2, el3), 1), requires_grad=False)
 
     if is_visualized:
@@ -44,7 +42,10 @@ def pre_train(is_visualized=False):
     return x1, y1
 
 
-def gradient_descent_with_relu(x1, y1, learning_rate=0.0001, n_units=50, n_iterations=100_000):
+def gradient_descent_with_relu(
+        x1, y1, learning_rate=0.0001, n_units=50, n_iterations=100_000,
+        N=100, D=3, K=3
+):
     """
     gradient descent for the neural network model with ReLU
     :param x1: the input vector
@@ -52,6 +53,9 @@ def gradient_descent_with_relu(x1, y1, learning_rate=0.0001, n_units=50, n_itera
     :param learning_rate: the learning rate
     :param n_units: the number of units in the hidden layer
     :param n_iterations: the number of hte iterations for gradient descent
+    :param N: number of points per class
+    :param D: dimensionality
+    :param K: number of classes
     :return: a numpy array of loss values over each gradient descent
     """
     # define loss value record
@@ -115,7 +119,10 @@ def gradient_descent_with_relu(x1, y1, learning_rate=0.0001, n_units=50, n_itera
     return loss_values, accuracy
 
 
-def gradient_descent_with_sigmoid_function(x1, y1, learning_rate=0.0001, n_units=50, n_iterations=100_000):
+def gradient_descent_with_sigmoid_function(
+        x1, y1, learning_rate=0.0001, n_units=50, n_iterations=100_000,
+        N=100, D=2, K=3
+):
     """
     gradient descent for the neural network model with sigmoid function
     :param x1: the input vector
@@ -123,6 +130,9 @@ def gradient_descent_with_sigmoid_function(x1, y1, learning_rate=0.0001, n_units
     :param learning_rate: the learning rate
     :param n_units: the number of units in the hidden layer
     :param n_iterations: the number of hte iterations for gradient descent
+    :param N: number of points per class
+    :param D: dimensionality
+    :param K: number of classes
     :return: a numpy array of loss values over each gradient descent
     """
     # define loss value record
@@ -302,7 +312,8 @@ def exercise1_3_2():
     accuracy_over_different_sizes_of_hidden_layer(1, n_units)
 
 
-# exercise1_1()
-# exercise1_2()
-# exercise1_3_1()
-exercise1_3_2()
+if __name__ == '__main__':
+    # exercise1_1()
+    # exercise1_2()
+    # exercise1_3_1()
+    exercise1_3_2()

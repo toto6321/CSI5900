@@ -1,5 +1,8 @@
+import Exercise1 as e1
 import matplotlib.pyplot as plt
 import numpy as np
+import torch
+from torch.autograd import Variable
 
 #####################################################################
 # 1. generate required dataset
@@ -48,3 +51,13 @@ for i in range(N_CLASSES):
 figure1 = plt.figure()
 plt.scatter(x[:, 0], x[:, 1], c=y, s=40, cmap=plt.cm.Spectral)
 plt.show()
+
+#####################################################################
+# 2. train on the data
+dtype = torch.FloatTensor
+x1 = Variable(torch.from_numpy(x).type(dtype), requires_grad=False)
+el1 = torch.cat((torch.ones(SIZE), torch.zeros(SIZE)), 0)
+el2 = torch.cat((torch.zeros(SIZE), torch.ones(SIZE)), 0)
+y1 = Variable(torch.stack((el1, el2), 1), requires_grad=False)
+
+e1.gradient_descent_with_sigmoid_function(x1, y1, N=150, D=2, K=2)
