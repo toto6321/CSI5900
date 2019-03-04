@@ -1,8 +1,9 @@
-import Exercise1 as e1
 import matplotlib.pyplot as plt
 import numpy as np
 import torch
 from torch.autograd import Variable
+
+import Exercise1 as e1
 
 #####################################################################
 # 1. generate required dataset
@@ -60,4 +61,8 @@ el1 = torch.cat((torch.ones(SIZE), torch.zeros(SIZE)), 0)
 el2 = torch.cat((torch.zeros(SIZE), torch.ones(SIZE)), 0)
 y1 = Variable(torch.stack((el1, el2), 1), requires_grad=False)
 
-e1.gradient_descent_with_sigmoid_function(x1, y1, N=150, D=2, K=2)
+n_unit = [20, 30, 40, 50, 60]
+e1.accuracy_over_different_sizes_of_hidden_layer(
+    x1, y1, N=150, D=2, K=2,
+    n_units=n_unit, gd_function=1
+)
